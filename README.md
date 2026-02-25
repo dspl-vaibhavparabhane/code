@@ -1,198 +1,278 @@
-# DSPL Asset Pulse - Frontend Dashboard
+# DSPL Asset Pulse - Backend API
 
-A modern Next.js dashboard with TypeScript, Material UI, and JWT-based authentication.
-
-## Features
-
-- **Authentication & Authorization**: JWT-based auth with role-based routing
-- **User Management**: CRUD operations for users (HR/Admin only)
-- **Conference Room Management**: View and manage meeting rooms
-- **Booking System**:
-  - Create and manage bookings
-  - Real-time availability checking
-  - Filter by upcoming, completed, or cancelled
-  - Calendar view for bookings
-- **Responsive Design**: Material-UI components with mobile support
-- **Dark/Light Theme**: Toggle between themes
-- **Auto Token Refresh**: Seamless authentication experience
-
-
-##  Project Structure
-
-```
-dspl-asset-pulse-frontend/
-├── src/
-│   ├── app/
-│   │   ├── dashboard/
-│   │   │   ├── admin/
-│   │   │   │   ├── admins/page.tsx
-│   │   │   │   ├── assets/page.tsx
-│   │   │   │   ├── employees/page.tsx
-│   │   │   │   ├── hr/page.tsx
-│   │   │   │   └── page.tsx
-│   │   │   ├── employee/
-│   │   │   │   ├── assets/page.tsx
-│   │   │   │   └── page.tsx
-│   │   │   ├── hr/
-│   │   │   │   ├── assets/page.tsx
-│   │   │   │   ├── employees/page.tsx
-│   │   │   │   └── page.tsx
-│   │   │   ├── bookings/page.tsx
-│   │   │   ├── conference-rooms/page.tsx
-│   │   │   ├── profile/page.tsx
-│   │   │   ├── layout.tsx
-│   │   │   └── page.tsx
-│   │   ├── login/page.tsx
-│   │   ├── unauthorized/page.tsx
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   ├── metadata.ts
-│   │   └── page.tsx
-│   ├── components/
-│   │   ├── assets/
-│   │   ├── bookings/
-│   │   │   ├── BookingList.tsx
-│   │   │   ├── CreateBookingDialog.tsx
-│   │   │   └── CancelBookingDialog.tsx
-│   │   ├── conference-rooms/
-│   │   │   ├── ConferenceRoomList.tsx
-│   │   │   ├── CreateConferenceRoomDialog.tsx
-│   │   │   └── EditConferenceRoomDialog.tsx
-│   │   ├── common/
-│   │   ├── dashboard/
-│   │   ├── layout/
-│   │   ├── users/
-│   │   ├── ProtectedRoute.tsx
-│   │   └── ThemeWrapper.tsx
-│   ├── contexts/
-│   │   └── AuthContext.tsx
-│   ├── hooks/
-│   │   ├── index.ts
-│   │   ├── useAssetManagement.ts
-│   │   ├── useBookingManagement.ts
-│   │   ├── useConferenceRoomManagement.ts
-│   │   ├── useDashboardMetrics.ts
-│   │   ├── useDialogState.ts
-│   │   ├── useFilters.ts
-│   │   ├── usePagination.ts
-│   │   ├── useSnackbar.ts
-│   │   └── useUserManagement.ts
-│   ├── lib/
-│   │   ├── constants/
-│   │   ├── utils/
-│   │   └── index.ts
-│   ├── services/
-│   │   ├── api.ts
-│   │   ├── assets.ts
-│   │   ├── auth.ts
-│   │   ├── bookings.ts
-│   │   ├── conferenceRooms.ts
-│   │   └── users.ts
-│   ├── theme/
-│   │   └── theme.ts
-│   └── types/
-│       ├── asset.ts
-│       ├── booking.ts
-│       ├── conferenceRoom.ts
-│       ├── common.ts
-│       ├── css.d.ts
-│       ├── index.ts
-│       └── user.ts
-├── public/
-├── .next/ (build artifacts)
-├── package.json
-├── tsconfig.json
-├── next.config.js
-└── README.md
+## Architecture Overview
 
 ```
 
-##  Quick Start
+app/
+├── init.py # Flask app factory
+├── config/
+│ └── init.py # Environment configs (dev, prod, test)
+├── models/
+│ ├── init.py # Model exports
+│ ├── db.py # Database initialization
+│ ├── user.py # User model with UserRole enum
+│ ├── employee.py # Employee model with EmployeeStatus enum
+│ ├── conference_room.py # ConferenceRoom model
+│ └── booking.py # Booking model with BookingStatus enum
+├── controllers/
+│ ├── init.py # Controller exports
+│ ├── auth_controller.py # Authentication request handlers
+│ ├── user_controller.py # User management request handlers
+│ ├── conference_room_controller.py # Conference room request handlers
+│ └── booking_controller.py # Booking request handlers
+├── services/
+│ ├── init.py # Service exports
+│ ├── auth_service.py # Authentication business logic
+│ ├── user_service.py # User management business logic
+│ ├── conference_room_service.py # Conference room business logic
+│ └── booking_service.py # Booking business logic with conflict detection
+├── routes/
+│ ├── init.py # Blueprint registry
+│ ├── auth.py # Auth endpoints
+│ ├── sample.py # Sample protected endpoints
+│ ├── user_routes.py # User management endpoints
+│ ├── conference_room_routes.py # Conference room endpoints
+│ └── booking_routes.py # Booking endpoints
+└── utils/
+├── jwt_utils.py # JWT token utilities & decorators
+└── password_utils.py # Password verification
+```
+
+## Quick Start
 
 ### 1. Install Dependencies
 
+Using uv:
 ```bash
-npm install
+uv sync
 ```
 
-### 2. Set Environment Variables
+
+### 2. Run Development Server
 
 ```bash
-cp .env.example .env.local
+python run.py
 ```
-
-### 3. Run Development Server
-
+### 4. Seed Demo Users and Data
 ```bash
-npm run dev
+# Seed users only
+python seed_db.py
+
+
 ```
 
-Visit `http://localhost:3000`
+#  API Endpoints
 
-##  Authentication Flow
+## Authentication
 
-1. **Login Page**: User enters email and password
-2. **Backend Login**: Frontend calls `/api/v1/auth/login`
-3. **Token Storage**: Access and refresh tokens stored in localStorage
-4. **Protected Routes**: Routes check authentication status
-5. **Auto Refresh**: Axios interceptor auto-refreshes expired tokens
-6. **Dashboard Redirect**: User redirected to role-based dashboard
+- **POST** `/api/v1/auth/register`  
+  Register a new user
 
+- **POST** `/api/v1/auth/login`  
+  User login
+
+- **POST** `/api/v1/auth/refresh`  
+  Refresh access token
+
+
+## Sample Protected Endpoints
+
+- **GET** `/api/v1/sample/me`  
+  Get current user
+
+- **GET** `/api/v1/sample/employee-data`  
+  Employee-only endpoint
+
+- **GET** `/api/v1/sample/hr-data`  
+  HR-only endpoint
+
+- **GET** `/api/v1/sample/admin-data`  
+  Admin-only endpoint
+
+
+## User Management
+
+- **POST** `/api/v1/users`  
+  Create user (Admin/HR only)
+
+- **GET** `/api/v1/users`  
+  Get users with filters, pagination, and sorting (Admin/HR only)
+
+- **GET** `/api/v1/users/<id>`  
+  Get user by ID
+
+- **PUT** `/api/v1/users/<id>`  
+  Update user (Admin/HR only)
+
+- **DELETE** `/api/v1/users/<id>`  
+  Delete user (Admin only)
+
+
+## Conference Room Management
+
+- **POST** `/api/v1/conference-rooms`  
+  Create conference room (Admin/HR only)
+
+- **GET** `/api/v1/conference-rooms`  
+  Get all conference rooms with pagination
+
+- **GET** `/api/v1/conference-rooms/<id>`  
+  Get conference room by ID
+
+- **PUT** `/api/v1/conference-rooms/<id>`  
+  Update conference room (Admin/HR only)
+
+- **DELETE** `/api/v1/conference-rooms/<id>`  
+  Delete conference room (Admin only)
+
+
+## Booking Management
+
+- **POST** `/api/v1/bookings`  
+  Create a new booking (All authenticated users)
+
+- **GET** `/api/v1/bookings/my-bookings`  
+  Get current user's bookings
+
+- **GET** `/api/v1/bookings/all`  
+  Get all bookings (Admin/HR only)  
+  Query params:
+  - `upcoming_only=true` - Show only upcoming bookings
+  - `upcoming_only=false` - Show all bookings (default)
+  - `status=confirmed|complete|cancelled` - Filter by status
+
+- **PUT** `/api/v1/bookings/<id>/cancel`  
+  Cancel a booking
+
+- **GET** `/api/v1/bookings/availability`  
+  Check room availability for a date range
+
+
+## Asset Management (FR-3)
+
+- **POST** `/api/v1/assets`  
+  Create asset (Admin/HR only)
+
+- **GET** `/api/v1/assets`  
+  Get all assets (Admin/HR only)
+
+- **POST** `/api/v1/assets/<id>/assign`  
+  Assign asset to employee (Admin/HR only)
+
+- **POST** `/api/v1/assets/<id>/unassign`  
+  Unassign (return) asset (Admin/HR only)
+
+- **GET** `/api/v1/assets/employees/<id>/assets`  
+  Get employee's assigned assets
+
+
+---
+
+#  Database Models
+
+## User Model
+
+| Field        | Type / Description |
+|-------------|--------------------|
+| `id`        | Primary Key |
+| `email`     | Unique, Required, Indexed |
+| `password`  | Required |
+| `name`      | Optional |
+| `role`      | Enum: `Employee`, `HR`, `Admin` |
+| `created_at` | Timestamp |
+| `updated_at` | Timestamp |
+| `employee`  | One-to-one relationship with `Employee` |
+
+
+## Employee Model
+
+| Field              | Type / Description |
+|-------------------|--------------------|
+| `id`              | Primary Key |
+| `user_id`         | Foreign Key to `User` (one-to-one) |
+| `join_date`       | Date, Required |
+| `separation_date` | Date, Optional |
+| `status`          | Enum: `active`, `separated` |
+| `created_at`      | Timestamp |
+| `updated_at`      | Timestamp |
+| `assignments`     | Relationship to `AssetAssignment` |
+
+
+## ConferenceRoom Model
+
+| Field        | Type / Description |
+|-------------|--------------------|
+| `id`        | Primary Key |
+| `name`      | Unique, Required |
+| `capacity`  | Integer, Required |
+| `location`  | String, Optional |
+| `is_active` | Boolean, Default: True |
+| `created_at` | Timestamp |
+| `bookings`  | Relationship to `Booking` |
+
+
+## Booking Model
+
+| Field        | Type / Description |
+|-------------|--------------------|
+| `id`        | Primary Key |
+| `room_id`   | Foreign Key to `ConferenceRoom` |
+| `user_id`   | Foreign Key to `User` |
+| `start_time` | DateTime, Required |
+| `end_time`  | DateTime, Required |
+| `purpose`   | String(500), Required |
+| `status`    | Enum: `confirmed`, `cancelled`, `complete` |
+| `created_at` | Timestamp |
+| `room`      | Relationship to `ConferenceRoom` |
+| `user`      | Relationship to `User` |
+
+
+## Asset Model (FR-3)
+
+| Field        | Type / Description |
+|-------------|--------------------|
+| `id`        | Primary Key |
+| `asset_code` | Unique, Required, Indexed |
+| `asset_name` | Required |
+| `asset_type` | Optional |
+| `status`    | Enum: `available`, `assigned`, `maintenance` |
+| `created_by` | Foreign Key to `User` |
+| `created_at` | Timestamp |
+| `updated_at` | Timestamp |
+| `assignments` | Relationship to `AssetAssignment` |
+
+
+## AssetAssignment Model (FR-3)
+
+| Field         | Type / Description |
+|--------------|--------------------|
+| `id`         | Primary Key |
+| `asset_id`   | Foreign Key to `Asset` |
+| `employee_id` | Foreign Key to `Employee` |
+| `assigned_by` | Foreign Key to `User` |
+| `assigned_at` | Timestamp, Required |
+| `returned_by` | Foreign Key to `User`, Optional |
+| `returned_at` | Timestamp, Optional |
+| `status`     | Enum: `assigned`, `returned` |
+| `created_at` | Timestamp |
+| `updated_at` | Timestamp |
 
 
 ##  Dependencies
 
-- **Next.js** 14.0.0 - React framework
-- **React** 18.2.0 - UI library
-- **TypeScript** 5.3.0 - Type safety
-- **Material-UI** 5.x - UI components
-- **Axios** 1.6.0 - HTTP client
-- **date-fns** - Date manipulation
-- **React Hook Form** - Form handling
+Flask, Flask-SQLAlchemy, Flask-Migrate, Flask-CORS, Flask-JWT-Extended, Flasgger (Swagger UI), Werkzeug, python-dotenv, psycopg2-binary, cryptography, gunicorn
 
-## Key Features Implementation
 
-### Booking System
-- Create bookings with date/time picker
-- Real-time conflict detection
-- Filter by upcoming/completed/cancelled
-- Cancel bookings with confirmation
-- View booking history
+##  Demo Credentials
 
-### Conference Room Management
-- List all available rooms
-- Create/Edit/Delete rooms (HR/Admin)
-- View room capacity and location
-- Activate/Deactivate rooms
-
-### Authentication
-- JWT token storage in localStorage
-- Automatic token refresh on 401
-- Role-based route protection
-- Redirect to login on auth failure
-
-### API Integration
-- Centralized axios client with interceptors
-- Automatic Bearer token injection
-- Error handling and user feedback
-- Type-safe API calls
-
-##  Production Build
-
-```bash
-# Build
-npm run build
-
-# Start production server
-npm start
-```
-
-## 🧪 Testing Credentials
-
-| Role | Email | Password |
-|------|-------|----------|
+| Role     | Email                | Password    |
+|----------|----------------------|-------------|
+| Admin    | admin@company.com    | password123 |
+| HR       | hr@company.com       | password123 |
 | Employee | employee@company.com | password123 |
-| HR | hr@company.com | password123 |
-| Admin | admin@company.com | password123 |
 
 
+##  Swagger Documentation
+
+Access interactive API documentation at: `http://localhost:5000/apidocs`
